@@ -15,7 +15,7 @@ var Spotify = require('node-spotify-api');
 var spotify = new Spotify({
     id: env.SPOTIFY_ID,
     secret: env.SPOTIFY_SECRET
-    
+
 });
 
 //variables that grabs arguments
@@ -24,7 +24,7 @@ var clientArray = [];
 
 //For loop to combine word arguments 
 for (var i = 3; i < argv.length; i++){
-  if (i>3 && i>argv.length) {
+  if (i > 3 && i > argv.length) {
     clientArray = clientArray + "+" + argv[i]; 
   } else {
     clientArray = clientArray + argv[i]; 
