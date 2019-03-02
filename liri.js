@@ -39,7 +39,7 @@ var movieThis = function() {
       console.log("Language: " + response.data.Language);
       console.log("Cast: " + response.data.Actors);
       console.log("Plot: " + response.data.Plot);
-      console.log("----------------------------");
+
     }
   );
 };
@@ -56,11 +56,11 @@ var concertThis = function() {
 
             console.log("Artist: "+response.data[0].lineup);
             console.log("Venue name: "+response.data[0].venue.name);
-            console.log("Location: "+response.data[0].venue.city +", "+ response.data[0].venue.country);
+            console.log("Location: "+response.data[0].venue.city +", " + response.data[0].venue.country);
             venueDate = response.data[0].datetime;
             formatDate = moment(venueDate).format("MM/DD/YYYY");
-            console.log("Date: "+formatDate);
-            console.log("----------------------------");
+            console.log("Date: "+ formatDate);
+
         }     
     });
 };
@@ -125,7 +125,7 @@ if (input === "spotify-this-song") {
 var log = fs.createWriteStream(__dirname + "/log.txt", {flags: "a"});
 var stdout = process.stdout;
 
-console.log = function(x){
-    log.write(util.format(x)+"\r\n");
-    stdout.write(util.format(x)+"\r\n");
+console.log = function(logger){
+    log.write(util.format(logger)+"\r\n");
+    stdout.write(util.format(logger)+"\r\n");
 }
