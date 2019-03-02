@@ -1,251 +1,131 @@
+// At the top of the `liri.js` file, add code to read and set any environment variables with the dotenv package:
 require("dotenv").config();
 
-//required variables
-var keys = require("./keys.js");  
+
+//require variables 
 var axios = require("axios");
-var moment = require("moment");
+var keys = require("./keys.js");
 var fs = require("fs");
-
-
-//argument arrays
-var argv = process.argv;
-
-var Spotify = require('node-spotify-api');
-
-var spotify = new Spotify({
-    id: env.SPOTIFY_ID,
-    secret: env.SPOTIFY_SECRET
-
-});
-
-//variables that grabs arguments
-var command = process.argv[2]; 
-var clientArray = [];
-
-//For loop to combine word arguments 
-for (var i = 3; i < argv.length; i++){
-  if (i > 3 && i > argv.length) {
-    clientArray = clientArray + "+" + argv[i]; 
-  } else {
-    clientArray = clientArray + argv[i]; 
-  }
-}
-
-//Combined search query to creat string for any search that is being input 
-var search = argv.join(""); 
-
-//Switch statement
-switch (command) {
-  case 'spotify-this-song':
-  spotifySong()
-      break;
-  case 'concert-this':
-      concertThis()
-      break;
-  case 'movie-this':
-      movieThis()
-      break;
-  case 'do-what-it-says':
-      dowhatitSays2()
-      break;
-  default:
-      console.log("No type value found");
-
-//   1. `node liri.js concert-this <artist/band name here>`
-      function concertThis() {
-
-        var artist = ""; 
-        bandsArgv = process.argv;
-        if (input === undefined){
-            artist = "The Internet"
-        } else {
-            for (var i = 3; i < bandsArgv.length; i++){
-                artist += bandsArgv[i];
-            }
-        }
-        axios.get("https://rest.bandsintown.com/artists/" + artist +"/events?app_id=codingbootcamp").then(
-      function(response) {
-        var result = response.data[0];
-        console.log("You searched for: "+ artist);
-        console.log("Venue: "+result.venue.name);
-        console.log("Location: "+result.venue.city);
-        console.log(moment(result.datetime).format('MM-DD-YY'));
-    
-        })
-    }    }
-// 2. `node liri.js spotify-this-song '<song name here>'`
-function spotifySong() {
-  if (search === "") {
-    search = "kanye+west+gold+digger"
-}
-
-spotify.search({
-    type: 'artist,track',
-    query: search
-}, function (err,data) {require("dotenv").config();
-
-var keys = require("./keys.js");  
-var Spotify = require('node-spotify-api');
+var util = require("util");
+var moment = require("moment");
+var Spotify = require("node-spotify-api");
 var spotify = new Spotify(keys.spotify);
-var axios = require("axios");
-var moment = require("moment");
-var fs = require("fs");
 
-var request = process.argv[2]; 
-var input = process.argv[3]; 
+//argument variables
+var input = process.argv[2];
+var search = process.argv.slice(5);
+
+//Combined search query to create string for any search that is being input 
+var artist = search.join("");
 
 
-function searchSong(){
-    var songArgv = process.argv;
-    input = input + "+";
-    if (input === undefined){
-      input ="TKanye West Gold Digger";
-    } else {
-      for (var i = 4; i < songArgv.length; i++){
-        input += songArgv[i] + "+";
-      }
-    } 
-     
-    spotify.search({ type: 'track', query: input, limit:1 }, function(err, data) {
-      if (err) {
-        return console.log('Error: ' + err);
-      }
-     
-      console.log(input);
-      var search = data.tracks.items;
-      console.log("Artist: "+search[0].artists[0].name)
-      console.log("Song Name: "+search[0].name);
-      console.log("Check out a Preview: "+JSON.stringify(search[0].external_urls));
-      console.log("Album: "+search[0].album.name);
-      }
-    );
-}
-
-    function bandsintown() {
-        if (search === "") {
-            console.log('\n')
-            console.log("Artist not entered. Please enter Artist name")
-            console.log('\n')
-        } else {
-            axios.get("https://rest.bandsintown.com/artists/" + search + "/events?app_id=codingbootcamp").then(
-            function (response) {
-               if(response.data.length <= 0) {
-                   console.log("Artist information unavailable")
-               } else {
-                for (var i=0; i < response.data.length; i++) {
-    
-                    var concertData = `\n
-        Venue: ${response.data[i].venue.name}
-        Location: ${response.data[i].venue.city + ", " + response.data[0].venue.region}
-        Event Date: ${moment(response.data[i].datetime).format('MM-DD-YY')}
-                `
-                console.log(concertData)
-                }
-               }
-               
-                dataLog(concertData)
-            }
-        );
-        }
+// function to use following command: node liri.js movie-this
+var movieThis = function() {
+  
+    if (search.length == 0 || search == null){
+        search = "Mr Nobody";
     }
+  axios.get("http://omdbapi.com/?t=" + search + "&apikey=trilogy").then(
+    function(response) {
+      console.log("Title: " + response.data.Title);
+      console.log("Year: " + response.data.Year);
+      console.log("IMDB Rating: " + response.data.Ratings[0].Value);
+      if (!response.data.Ratings[1]) {
+        console.log("RT Rating not avaliable");
+      } else {
+        console.log("RT Rating: " + response.data.Ratings[1].Value);
+      }
+      console.log("Country Produced in: " + response.data.Country);
+      console.log("Language: " + response.data.Language);
+      console.log("Cast: " + response.data.Actors);
+      console.log("Plot: " + response.data.Plot);
+      console.log("----------------------------");
+    }
+  );
+};
 
-// 3. `node liri.js movie-this '<movie name here>'`
-    function movieThis(){
-        var movieTitle = '';
-        var movieArgv = process.argv;
-        
-        if(input === undefined){
-        // if there is not a movie name entered
-          movieTitle = 'Mr.'+ "+" +"Nobody";  
-        }  else {
-        // or else this will take movie names with 1 or more words
-          for (var i = 3; i < theArg.length; i++){
-              movieTitle += movieArgv[i]+ "+";
-          }
-        }
-        
-        var url = "http://www.omdbapi.com/?t="+ movieTitle +"&y=&plot=short&apikey=trilogy";
-        // Axios request to the OMDB API with the movie specified
-        axios.get(url)
-        .then(
-          function(response) {
-            
-            console.log("Title: "+response.data.Title);
-            console.log("Year: "+response.data.Year);
-            console.log("IMDB Rating: "+response.data.imdbRating);
-            console.log("Rotten Tomatoes Rating: "+response.data.Ratings[0].Value);
-            console.log("Country of Origin: "+response.data.Country);
-            console.log("Language: "+response.data.Language);
-            console.log("Plot: "+response.data.Plot);
-            console.log("Actors :"+response.data.Actors);
-            }
-          );
-        }
 
-// 4. `node liri.js do-what-it-says`
-function dowhatitSays(){
-    
-    fs.readFile("log.txt", "utf8", function(error,data){
-        if (error) {
-            return console.log(error);
-        } 
-        
-        var command = data.split(',');
-             
-          
-              request = command[0];
-              input = command[1];
+// function to use following command: node liri.js concert-this
+var concertThis = function() {
+  axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp"
+    )
+    .then(function(response) {
+        if (response.data[0].lineup === undefined){
+            console.log("No information available.")
+        } else {
 
-              confirmCommand();
-            });
-          }
-          function confirmCommand(){
+            console.log("Artist: "+response.data[0].lineup);
+            console.log("Venue name: "+response.data[0].venue.name);
+            console.log("Location: "+response.data[0].venue.city +", "+ response.data[0].venue.country);
+            venueDate = response.data[0].datetime;
+            formatDate = moment(venueDate).format("MM/DD/YYYY");
+            console.log("Date: "+formatDate);
+            console.log("----------------------------");
+        }     
+    });
+};
 
-            if(request == "spotify-this-song"){
-              searchSong();
-            }else if(request === 'movie-this'){
-              movieThis();
-            } else if(request === 'concert-this'){
-              bandsintown();
-            }else if (request === 'do-what-it-says'){
-              dowhatitSays();
-            } else {
-              console.log("Your command is invalid!");
-            }
-            
-            }
-            confirmCommand();
-            if (err) {
-                return console.log('Error: ' + err);
-            }
-            console.log('\n')
-    
-            var artistData = `\n
-                Artist: ${data.tracks.items[0].artists[0].name}
-                Track: ${data.tracks.items[0].name}
-                Preview: ${data.tracks.items[0].preview_url}
-                Album: ${data.tracks.items[0].album.name}
-                `
-                    console.log(artistData)
-                            dataLog(artistData)
-        }
-    );
-}
 
-// node liri.js do-what-it-says - created another function
-
-function dowhatitSays2 () {
-    fs.readFile("random.txt", "utf8", function(error, data) {
-
-        if (error) {
-          return console.log(error);
-        }
-
-        var dataArr = data.split(",");
+// function to use following command: node liri.js spotify-this-song
+var spotifyThis = function(search) {
+    if (search === undefined || search.length == 0) {
+      search = "Ace of Base";
+    }
+    spotify.search({ type: "track", query: search, limit: 1 }, function(err,data) {
       
-        searchLast = dataArr[1];
-        spotifySong()
-      });
+    if (err) {
+      console.log(err);
+    }
+    console.log("Artist: " + JSON.stringify(data.tracks.items[0].artists[0].name));
+    
+    console.log("Song: " + JSON.stringify(data.tracks.items[0].name));
+
+    if (data.tracks.items[0].preview_url === null) {
+        console.log("Preview Link: No preview avaliable.");
+    } else {
+        console.log("Preview Link: " + JSON.stringify(data.tracks.items[0].preview_url));
+        } 
+        console.log("Album: " + JSON.stringify(data.tracks.items[0].album.name));
+
+    });
+}
+
+// If/else statement for user input
+if (input === "spotify-this-song") {
+  spotifyThis(search);
+} else if (input === "movie-this") {
+  movieThis(search);
+} else if (input === "concert-this") {
+  concertThis(search);
+
+//node liri.js do-what-it-says
+} else if(input === "do-what-it-says"){
+    fs.readFile("./random.txt", "utf8", function read(err,data){
+        if (err) {
+            console.log(err);
+        }
+        
+        var splitData = data.split(",");
+        input = splitData[0];
+        search = splitData[1];
+
+        if(input === "spotify-this-song") {
+            spotifyThis(search);
+          } else if (input === "movie-this") {
+            movieThis(search);
+          } else if (input === "concert-this") {
+            concertThis(search);
+        }
+    })
 }
 
 
+
+// Logs the data into log.txt 
+var log = fs.createWriteStream(__dirname + "/log.txt", {flags: "a"});
+var stdout = process.stdout;
+
+console.log = function(x){
+    log.write(util.format(x)+"\r\n");
+    stdout.write(util.format(x)+"\r\n");
+}
