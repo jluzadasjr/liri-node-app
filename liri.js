@@ -105,9 +105,9 @@ if (input === "spotify-this-song") {
             console.log(err);
         }
         
-        var splitData = data.split(",");
-        input = splitData[0];
-        search = splitData[1];
+        var split = data.split(",");
+        input = split[0];
+        search = split[1];
 
         if(input === "spotify-this-song") {
             spotifyThis(search);
